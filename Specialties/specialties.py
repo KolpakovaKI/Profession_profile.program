@@ -1,156 +1,366 @@
 import requests
-import json
-import re
-from datetime import datetime, timedelta
 from collections import Counter
+import re
+import time
+from datetime import datetime, timedelta
+import os
 
-# --------- НАСТРОЙКИ ---------
+URL = "https://api.hh.ru/vacancies"
 
-SEARCH_QUERY = "IT"
-PER_PAGE = 100
-DAYS_STEP = 7          # шаг разбивки по датам
-TOTAL_DAYS = 365        # за сколько дней назад собираем
-
-
-# --------- НОРМАЛИЗАЦИЯ ---------
-
-NORMALIZATION_MAP = {
-    "front-end": "frontend",
-    "front end": "frontend",
-    "back-end": "backend",
-    "back end": "backend",
-    "full-stack": "fullstack",
-    "full stack": "fullstack",
-    "разработчик": "developer",
-}
-
-LEVEL_WORDS = [
-    "junior", "middle", "senior", "lead",
-    "младший", "старший", "ведущий"
+# IT роли HH
+roles = [
+156,160,10,12,150,25,165,34,36,73,155,96,
+164,104,157,107,112,113,148,114,116,121,124,125,126
 ]
 
+# ========= категории =========
+categories = {
+    "PHP Developer": [
+        "php", "php программист", "php developer", "laravel", "symfony"
+    ],
 
-def normalize_title(title):
-    title = title.lower().strip()
+    "Java Developer": [
+        "java", "java программист", "java developer", "spring", "hibernate"
+    ],
 
-    for level in LEVEL_WORDS:
-        title = title.replace(level, "")
+    "Python Developer": [
+        "python", "python программист", "python developer", "django", "flask"
+    ],
 
-    for key, value in NORMALIZATION_MAP.items():
-        title = title.replace(key, value)
+    "C/C++ Developer": [
+        "c++", "c", "с++", "c developer", "c++ developer", "qt", "linux developer"
+    ],
 
-    title = re.sub(r"[^\w\s]", "", title)
-    title = re.sub(r"\s+", " ", title)
+    "C# Developer": [
+        "c#", ".net", "c# разработчик", "c# developer"
+    ],
 
-    return title.strip()
+    "Web Developer": [
+            "web разработчик", "web programmer", "веб-разработчик", "web developer", "web-программист", "Веб-разработчик"
+        ],
 
+    "Tester": [
+        "tester", "тестировщик", "специалист по тестированию"
+    ],
 
-# --------- ПАРСИНГ С РАЗБИВКОЙ ПО ДАТАМ ---------
+    "Frontend": [
+        "frontend", "react", "vue", "angular",
+        "javascript", "typescript", "html", "css",
+        "фронтенд", "web разработчик", "веб-разработчик",
+        "frontend developer", "ui developer"
+    ],
 
-def get_vacancies_by_date_range(date_from, date_to):
-    titles = []
-    page = 0
-    MAX_PAGES = 20  # лимит HH
+    "Backend": [
+        "backend", "node", "nestjs", "go", "api", "бэкенд", "бекенд", "spring backend"
+    ],
 
-    while page < MAX_PAGES:
-        try:
-            response = requests.get(
-                "https://api.hh.ru/vacancies",
-                params={
-                    "text": SEARCH_QUERY,
-                    "professional_role": 96,
-                    "per_page": PER_PAGE,
-                    "page": page,
-                    "date_from": date_from.isoformat(),
-                    "date_to": date_to.isoformat()
-                },
-                timeout=10
-            )
-            response.raise_for_status()
-            data = response.json()
-        except requests.exceptions.RequestException as e:
-            print(f"Ошибка запроса: {e}")
-            break
+    "Fullstack": [
+        "fullstack", "full-stack", "full stack", "фуллстек",
+        "fullstack developer", "full-stack developer"
+    ],
 
-        items = data.get("items", [])
-        if not items:
-            break
+    "Mobile": [
+        "android", "ios", "flutter", "react native",
+        "kotlin", "swift", "мобильный", "android-разработчик",
+        "ios-разработчик", "mobile developer"
+    ],
 
-        for vac in items:
-            raw_title = vac.get("name")
-            titles.append(normalize_title(raw_title))
+    "GameDev": [
+        "unity", "unreal", "gamedev", "game developer",
+        "игровой", "game dev"
+    ],
 
-        page += 1
+    "Embedded": [
+        "embedded", "микроконтроллер", "stm32", "firmware",
+        "arduino", "встроенный"
+    ],
 
-    return titles
+    "Data / ML / AI": [
+        "ml", "machine learning", "ai",
+        "нейрон", "llm", "data engineer",
+        "big data", "rag", "искусственный интеллект", "машинное обучение"
+    ],
 
+    "BI / Data": [
+        "bi", "power bi", "etl",
+        "dwh", "sql developer", "postgres",
+        "oracle", "аналитик", "бд", "data analyst"
+    ],
 
-def collect_all_titles():
-    all_titles = []
+    "1C": [
+        "1с", "1c developer", "1 с"
+    ],
 
+    "QA/QI": [
+            "qi", "qa"
+        ],
+
+    "Engineer": [
+                "engineer", "инженер"
+            ],
+
+    "DB Admin": [
+                "администратор", "администратор баз данных", "системный администратор"
+                ],
+
+    "Project Manager": [
+        "Project Manager", "product manager", "менеджер", "менеджер проектов", "проектный менеджер"
+    ],
+
+    "DevOps": [
+        "devops", "kubernetes", "docker",
+        "ci/cd"
+    ],
+
+    "Low-code / No-code": [
+        "low code", "no code",
+        "power platform", "tilda"
+    ],
+
+    "Automation / RPA": [
+        "rpa", "robotization",
+        "zennoposter", "automation", "роботизация"
+    ],
+
+    "PLC / Industrial": [
+        "асу", "чпу", "plc", "siemens",
+        "automation engineer", "промышленный"
+    ],
+
+    "Team Leader": [
+            "team leader", "тимлид", "руководитель проектов", "ИТ-лидер", "graphic"
+    ],
+
+    "Design": [
+        "designer", "дизайнер", "ux", "ui", "graphic",
+        "ux/ui designer", "product designer", "visual designer", "web designer"
+    ]
+}
+
+# ---------- СЛОВАРЬ ТЕХНОЛОГИЙ ----------
+technology_patterns = {
+    "Python": r"\bpython\b",
+    "Java": r"\bjava\b",
+    "JavaScript": r"javascript|\bjs\b",
+    "TypeScript": r"typescript",
+    "PHP": r"\bphp\b",
+    "C#": r"c#|\.net",
+    "C++": r"c\+\+",
+    "C": r"\bc\b",
+    "Go": r"golang|\bgo\b",
+    "Ruby": r"\bruby\b",
+    "Rust": r"\brust\b",
+    "Kotlin": r"kotlin",
+    "Swift": r"swift",
+    "React": r"react",
+    "Vue": r"vue",
+    "Angular": r"angular",
+    "Flutter": r"flutter",
+    "React Native": r"react native",
+    "Android": r"android",
+    "iOS": r"\bios\b",
+    "Django": r"django",
+    "Spring": r"spring",
+    "Laravel": r"laravel",
+    "Node.js": r"node\.?js",
+    "PostgreSQL": r"postgres",
+    "MySQL": r"mysql",
+    "MongoDB": r"mongodb",
+    "Redis": r"redis",
+    "Docker": r"docker",
+    "Kubernetes": r"kubernetes|k8s",
+    "CI/CD": r"ci.?cd",
+    "Power BI": r"power bi",
+    "TensorFlow": r"tensorflow",
+    "PyTorch": r"pytorch"
+}
+
+# ---------- ФУНКЦИИ КЛАССИФИКАЦИИ ----------
+def normalize(text):
+    text = text.lower()
+    text = text.replace("-", " ")
+    return text
+
+def classify_category(title):
+    t = normalize(title)
+
+    # сначала точные категории
+    for cat, keywords in categories.items():
+        for kw in keywords:
+            if kw in t:
+                return cat
+
+    # Generic programmer только если нет технологий
+    tech_keywords = [
+        "python", "java", "c#", "c++", "c", "javascript", "typescript",
+        "php", "go", "ruby", "rust", "kotlin", "swift"
+    ]
+    if any(k in t for k in tech_keywords):
+        # если есть явная технология, пробуем присвоить конкретную категорию
+        if "backend" in t or "api" in t or "django" in t or "flask" in t or "spring" in t or "php" in t:
+            return "Backend"
+        if "frontend" in t or "react" in t or "vue" in t or "angular" in t or "web" in t:
+            return "Frontend"
+        if "android" in t or "ios" in t or "kotlin" in t or "swift" in t:
+            return "Mobile"
+
+    if "разработчик" in t or "developer" in t or "программист" in t:
+        return "General Programmer"
+
+    return "Other IT"
+
+# ---------- СБОР ВАКАНСИЙ ----------
+def collect_vacancies():
+
+    vacancies = []
+    seen_ids = set()
+
+    days = 60
     today = datetime.now()
-    start_date = today - timedelta(days=TOTAL_DAYS)
 
-    current_date = start_date
+    for i in range(days):
 
-    while current_date < today:
-        next_date = current_date + timedelta(days=DAYS_STEP)
+        date_from = (today - timedelta(days=i+1)).strftime("%Y-%m-%d")
+        date_to = (today - timedelta(days=i)).strftime("%Y-%m-%d")
 
-        print(f"Сбор вакансий с {current_date.date()} по {next_date.date()}")
+        print(f"\nСбор за {date_from}")
 
-        titles = get_vacancies_by_date_range(current_date, next_date)
-        all_titles.extend(titles)
+        for page in range(20):
 
-        current_date = next_date
+            params = {
+                "professional_role": roles,
+                "per_page": 100,
+                "page": page,
+                "date_from": date_from,
+                "date_to": date_to
+            }
 
-    return all_titles
+            response = requests.get(URL, params=params)
 
+            if response.status_code != 200:
+                break
 
-# --------- АНАЛИЗ ---------
+            data = response.json()
+            items = data.get("items", [])
 
-def calculate_top_percent(data_list, top_n=10):
-    counter = Counter(data_list)
-    total = len(data_list)
+            if not items:
+                break
 
-    top = counter.most_common(top_n)
+            for item in items:
 
-    return {
-        title: {
-            "count": count,
-            "percent": round(count / total * 100, 2)
-        }
-        for title, count in top
+                vacancy_id = item["id"]
+
+                if vacancy_id in seen_ids:
+                    continue
+
+                seen_ids.add(vacancy_id)
+                vacancies.append(item["name"])
+
+            print(f"  страница {page} | вакансий: {len(vacancies)}")
+
+            time.sleep(0.3)
+
+    with open("vacancies.txt", "w", encoding="utf-8") as f:
+        for v in vacancies:
+            f.write(v + "\n")
+
+    print("\nvacancies.txt обновлён")
+
+# ---------- АНАЛИЗ ----------
+def analyze_professions():
+
+    if not os.path.exists("vacancies.txt"):
+        print("Сначала нужно собрать вакансии")
+        return
+
+    with open("vacancies.txt", "r", encoding="utf-8") as f:
+        vacancies = [line.strip() for line in f]
+
+    compiled_tech = {
+        tech: re.compile(pattern, re.IGNORECASE)
+        for tech, pattern in technology_patterns.items()
     }
 
+    categories_assigned = []
+    other_it_list = []
+    general_programmer_list = []
+    technologies = []
 
-def save_json(filename, data):
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    for name in vacancies:
 
+        # ---- категории ----
+        cat = classify_category(name)
+        categories_assigned.append(cat)
 
-# --------- ЗАПУСК ---------
+        if cat == "Other IT":
+            other_it_list.append(name)
+        elif cat == "General Programmer":
+            general_programmer_list.append(name)
 
-if __name__ == "__main__":
-    print("Начинаем сбор данных...\n")
+        # ---- технологии ----
+        t_lower = name.lower()
+        for tech, pattern in compiled_tech.items():
+            if pattern.search(t_lower):
+                technologies.append(tech)
 
-    titles = collect_all_titles()
+    # ---------- ТОП категорий ----------
+    cat_counter = Counter(categories_assigned)
+    total_cat = sum(cat_counter.values())
 
-    # убираем дубликаты
-    titles = list(set(titles))
+    with open("top_categories.txt", "w", encoding="utf-8") as f:
+        f.write(f"Всего вакансий: {len(vacancies)}\n\n")
+        f.write("Топ категорий:\n\n")
+        for cat, count in cat_counter.most_common(15):
+            percent = round(count / total_cat * 100, 2)
+            f.write(f"{cat}: {percent}% ({count})\n")
 
-    print(f"\nВсего уникальных вакансий собрано: {len(titles)}")
+    # ---------- ТОП ТЕХНОЛОГИЙ ----------
+    tech_counter = Counter(technologies)
+    total_tech = sum(tech_counter.values())
 
-    save_json("it_all_titles_list.json", titles)
+    with open("top_technologies.txt", "w", encoding="utf-8") as f:
+        f.write(f"Всего технологий найдено: {total_tech}\n\n")
+        f.write("Топ технологий:\n\n")
+        for tech, count in tech_counter.most_common(20):
+            percent = round(count / total_tech * 100, 2)
+            f.write(f"{tech}: {percent}% ({count})\n")
 
-    top_professions = calculate_top_percent(titles, top_n=10)
+    # ---------- OTHER IT ----------
+    with open("other_it.txt", "w", encoding="utf-8") as f:
+        f.write(f"Other IT вакансии: {len(other_it_list)}\n\n")
+        for v in other_it_list:
+            f.write(v + "\n")
 
-    result = {
-        "total_vacancies_analyzed": len(titles),
-        "top_10_it_professions": top_professions
-    }
+    # ---------- GENERAL PROGRAMMER ----------
+    with open("general_programmer.txt", "w", encoding="utf-8") as f:
+        f.write(f"General Programmer вакансии: {len(general_programmer_list)}\n\n")
+        for v in general_programmer_list:
+            f.write(v + "\n")
 
-    save_json("it_top_10_professions.json", result)
+    print("top_categories.txt сохранён")
+    print("top_technologies.txt сохранён")
+    print("other_it.txt сохранён")
+    print("general_programmer.txt сохранён")
 
-    print("\nФайлы созданы:")
-    print("✔ it_all_titles_list.json")
-    print("✔ it_top_10_professions.json")
+# ---------- МЕНЮ ----------
+while True:
+
+    print("\n--- МЕНЮ ---")
+    print("1 - Собрать новые вакансии")
+    print("2 - Посчитать аналитику")
+    print("3 - Выход")
+
+    choice = input("Выберите действие: ")
+
+    if choice == "1":
+        collect_vacancies()
+
+    elif choice == "2":
+        analyze_professions()
+
+    elif choice == "3":
+        print("Выход из программы")
+        break
+
+    else:
+        print("Неверный ввод")
