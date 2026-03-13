@@ -28,35 +28,41 @@ categories = {
     ],
 
     "C/C++ Developer": [
-        "c++", "c", "с++", "c developer", "c++ developer", "qt", "linux developer"
+        "c++", "c++ developer", "c developer", "embedded c", "c++ программист", "программист c++",
+        "c++ разработчик", "инженер-программист c/c++", "программист c/c++", "разработчик c/c++",
+        "разработчик c", "c разработчик", "разработчик c++",
+
+        "с++ программист", "программист с++",
+        "с++ разработчик", "инженер-программист с/с++", "программист с/с++", "разработчик с/с++",
+        "разработчик с", "с разработчик", "разработчик с++",
+
     ],
 
     "C# Developer": [
-        "c#", ".net", "c# разработчик", "c# developer"
-    ],
-
-    "Web Developer": [
-            "web разработчик", "web programmer", "веб-разработчик", "web developer", "web-программист", "Веб-разработчик"
-        ],
-
-    "Tester": [
-        "tester", "тестировщик", "специалист по тестированию"
+        "c#", "с#", ".net", "c# разработчик", "c# developer",
+        "программист c#", "программист с#", "с# developer"
     ],
 
     "Frontend": [
         "frontend", "react", "vue", "angular",
         "javascript", "typescript", "html", "css",
-        "фронтенд", "web разработчик", "веб-разработчик",
-        "frontend developer", "ui developer"
+        "фронтенд", "frontend developer", "ui developer", "web programmer",
+        "web developer", "веб программист", "web программист",
+        "wordpress", "битрикс", "bitrix", "drupal", "cms",
+        "front developer", "фронтэнд", "верстальщик",
+        "веб разработчик", "web разработчик", "front end developer"
+
     ],
 
     "Backend": [
-        "backend", "node", "nestjs", "go", "api", "бэкенд", "бекенд", "spring backend"
+        "backend", "node", "nestjs", "go", "api", "spring backend",
+        "backend developer", "back end developer",
+        "back end разработчик", "бекэнд разработчик", "бекэнд",
     ],
 
     "Fullstack": [
-        "fullstack", "full-stack", "full stack", "фуллстек",
-        "fullstack developer", "full-stack developer"
+        "fullstack", "full stack", "фуллстек",
+        "fullstack developer"
     ],
 
     "Mobile": [
@@ -72,7 +78,11 @@ categories = {
 
     "Embedded": [
         "embedded", "микроконтроллер", "stm32", "firmware",
-        "arduino", "встроенный"
+        "arduino", "встроенный",
+        "fpga", "плис", "rtl", "verilog", "vhdl",
+        "встраиваем",
+        "firmware",
+        "embedded"
     ],
 
     "Data / ML / AI": [
@@ -84,27 +94,47 @@ categories = {
     "BI / Data": [
         "bi", "power bi", "etl",
         "dwh", "sql developer", "postgres",
-        "oracle", "аналитик", "бд", "data analyst"
+        "oracle", "бд", "sql", "pl/sql", "database developer",
+        "разработчик баз данных", "бд", "dba",
+    ],
+
+    "Data Analyst": [
+        "data analyst",
+        "аналитик данных",
+        "data analytics",
+        "data analysis",
+        "bi analyst",
+        "аналитик bi",
+        "продуктовый аналитик",
+        "product analyst",
+        "marketing analyst",
+        "маркетинговый аналитик",
+        "system analyst",
+        "analytics engineer",
+        "системный аналитик",
+        "аналитик 1c", "аналитик 1c"
     ],
 
     "1C": [
         "1с", "1c developer", "1 с"
     ],
 
-    "QA/QI": [
-            "qi", "qa"
-        ],
+    "QA/QI/Tester": [
+        "qi", "qa", "tester", "тестировщик", "специалист по тестированию"
+    ],
 
     "Engineer": [
-                "engineer", "инженер"
-            ],
+        "software engineer", "программный инженер"
+    ],
 
     "DB Admin": [
-                "администратор", "администратор баз данных", "системный администратор"
-                ],
+       "администратор баз данных", "системный администратор", "сетевой инженер", "сетевой администратор"
+    ],
 
     "Project Manager": [
-        "Project Manager", "product manager", "менеджер", "менеджер проектов", "проектный менеджер"
+        "project manager", "product manager", "менеджер проектов",
+        "проектный менеджер", "менеджер продуктов", "продуктовый менеджер",
+        "менеджер продукта", "менеджер проекта", "менеджер по продукту"
     ],
 
     "DevOps": [
@@ -124,16 +154,25 @@ categories = {
 
     "PLC / Industrial": [
         "асу", "чпу", "plc", "siemens",
-        "automation engineer", "промышленный"
+        "automation engineer", "промышленный",
+        "плк",
+        "plc",
+        "scada",
+        "asu",
+        "асу",
+        "hmi"
     ],
 
     "Team Leader": [
-            "team leader", "тимлид", "руководитель проектов", "ИТ-лидер", "graphic"
+        "team leader", "тимлид", "руководитель проектов"
     ],
 
     "Design": [
-        "designer", "дизайнер", "ux", "ui", "graphic",
-        "ux/ui designer", "product designer", "visual designer", "web designer"
+        "graphic designer", "product designer", "visual designer", "web designer",
+        "графический дизайнер", "веб дизайнер",
+        "ux ui дизайнер", "ui ux дизайнер", "ux designer",
+        "ui designer", "ux/ui дизайнер", "ui/ux дизайнер"
+        "ux дизайнер", "ui дизайнер",
     ]
 }
 
@@ -173,36 +212,45 @@ technology_patterns = {
     "Power BI": r"power bi",
     "TensorFlow": r"tensorflow",
     "PyTorch": r"pytorch"
+
 }
 
 # ---------- ФУНКЦИИ КЛАССИФИКАЦИИ ----------
 def normalize(text):
     text = text.lower()
     text = text.replace("-", " ")
+    text = text.replace("ё", "е")
     return text
 
 def classify_category(title):
+
     t = normalize(title)
 
-    # сначала точные категории
+    # 1C
+    if "1с" in t or "1c" in t:
+        return "1C"
+
+    # сначала категории
     for cat, keywords in categories.items():
         for kw in keywords:
             if kw in t:
                 return cat
 
-    # Generic programmer только если нет технологий
-    tech_keywords = [
-        "python", "java", "c#", "c++", "c", "javascript", "typescript",
-        "php", "go", "ruby", "rust", "kotlin", "swift"
-    ]
-    if any(k in t for k in tech_keywords):
-        # если есть явная технология, пробуем присвоить конкретную категорию
-        if "backend" in t or "api" in t or "django" in t or "flask" in t or "spring" in t or "php" in t:
-            return "Backend"
-        if "frontend" in t or "react" in t or "vue" in t or "angular" in t or "web" in t:
-            return "Frontend"
-        if "android" in t or "ios" in t or "kotlin" in t or "swift" in t:
-            return "Mobile"
+    # технологии
+    tech_map = {
+        "python": "Python Developer",
+        "java": "Java Developer",
+        "php": "PHP Developer",
+        "c#": "C# Developer",
+        "c++": "C/C++ Developer",
+        "rust": "C/C++ Developer",
+        "scala": "Java Developer",
+        "ruby": "Ruby Developer"
+    }
+
+    for tech, cat in tech_map.items():
+        if tech in t:
+            return cat
 
     if "разработчик" in t or "developer" in t or "программист" in t:
         return "General Programmer"
@@ -286,11 +334,19 @@ def analyze_professions():
     general_programmer_list = []
     technologies = []
 
+    # словарь вакансий по категориям
+    category_files = {cat: [] for cat in categories}
+    category_files["General Programmer"] = []
+    category_files["Other IT"] = []
+
     for name in vacancies:
 
         # ---- категории ----
         cat = classify_category(name)
         categories_assigned.append(cat)
+
+        # добавляем в общий словарь
+        category_files.setdefault(cat, []).append(name)
 
         if cat == "Other IT":
             other_it_list.append(name)
@@ -305,12 +361,23 @@ def analyze_professions():
 
     # ---------- ТОП категорий ----------
     cat_counter = Counter(categories_assigned)
-    total_cat = sum(cat_counter.values())
+
+    # убираем ненужные категории
+    excluded = {"General Programmer", "Other IT"}
+
+    filtered_counter = {
+        cat: count
+        for cat, count in cat_counter.items()
+        if cat not in excluded
+    }
+
+    total_cat = sum(filtered_counter.values())
 
     with open("top_categories.txt", "w", encoding="utf-8") as f:
         f.write(f"Всего вакансий: {len(vacancies)}\n\n")
         f.write("Топ категорий:\n\n")
-        for cat, count in cat_counter.most_common(15):
+
+        for cat, count in sorted(filtered_counter.items(), key=lambda x: x[1], reverse=True):
             percent = round(count / total_cat * 100, 2)
             f.write(f"{cat}: {percent}% ({count})\n")
 
@@ -341,6 +408,23 @@ def analyze_professions():
     print("top_technologies.txt сохранён")
     print("other_it.txt сохранён")
     print("general_programmer.txt сохранён")
+    # ---------- ФАЙЛЫ ПО КАТЕГОРИЯМ ----------
+
+    os.makedirs("categories", exist_ok=True)
+
+    for cat, vacs in category_files.items():
+
+        safe_name = cat.replace("/", "_").replace(" ", "_")
+        filename = f"categories/{safe_name}.txt"
+
+        with open(filename, "w", encoding="utf-8") as f:
+
+            f.write(f"{cat}: {len(vacs)} вакансий\n\n")
+
+            for v in vacs:
+                f.write(v + "\n")
+
+    print("Файлы категорий сохранены в папке categories")
 
 # ---------- МЕНЮ ----------
 while True:
